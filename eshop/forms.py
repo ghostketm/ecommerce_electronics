@@ -9,6 +9,14 @@ class UserRegisterForm(UserCreationForm):
     class Meta:
         model = User
         fields = ['username', 'email', 'password1', 'password2']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+            field.widget.attrs.update({
+                'class': 'form-control w-100',
+                'placeholder': field.label
+            })
 class OrderForm(forms.ModelForm):
     class Meta:
         model = Order

@@ -123,13 +123,19 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
 # Enable app-level static directories
-STATICFILES_DIRS = []  # Leave this empty for app-level static folders
+STATICFILES_DIRS = [BASE_DIR / "static", ]  # Leave this empty for app-level static folders
 
 # Directory where static files are collected (useful for deployment)
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / "eshop/static/images"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CSRF_COOKIE_SECURE = True 

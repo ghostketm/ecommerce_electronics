@@ -1,31 +1,36 @@
 {% extends 'eshop/base.html' %}
 
 {% block content %}
-  <h1>Order History</h1>
+<div class="order-history-container">
+  <h1 class="heading-orange">ORDER HISTORY</h1>
+  
   {% if orders %}
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>Order ID</th>
-          <th>Date</th>
-          <th>Total Price</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for order in orders %}
+    <div class="table-responsive">
+      <table class="order-table">
+        <thead>
           <tr>
-            <td>{{ order.id }}</td>
-            <td>{{ order.created }}</td>
-            <td>{{ order.get_total_price }}</td>
-            <td>
-              <a href="{% url 'order_detail' order.id %}" class="btn btn-sm btn-primary">View</a>
-            </td>
+            <th>Order ID</th>
+            <th>Date</th>
+            <th>Total Price</th>
+            <th></th>
           </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {% for order in orders %}
+            <tr>
+              <td>{{ order.id }}</td>
+              <td>{{ order.created }}</td>
+              <td>${{ order.get_total_price }}</td>
+              <td>
+                <a href="{% url 'eshop:order_detail' order.id %}" class="btn-view">View</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   {% else %}
-    <p>You have no past orders.</p>
+    <p class="no-orders">You have no past orders.</p>
   {% endif %}
+</div>
 {% endblock %}

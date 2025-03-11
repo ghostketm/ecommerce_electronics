@@ -2,7 +2,7 @@
 
 {% block content %}
   <div class="container mt-4">
-    <h1>Shopping Cart</h1>
+    <h1 class="text-orange text-center">Shopping Cart</h1>
 
     {% if cart_items %}
       <table class="table table-striped">
@@ -21,6 +21,7 @@
               <td>{{ cart_item.product.name }}</td>
               <td>
                 <form action="{% url 'eshop:update_cart' cart_item.id %}" method="post">
+                  {% csrf_token %}
                   <input type="number" name="quantity" value="{{ cart_item.quantity }}" min="1" class="form-control form-control-sm">
                   <button type="submit" class="btn btn-sm btn-primary">Update</button>
                 </form>
@@ -37,7 +38,7 @@
       <p>Total: ${{ cart.get_total_price }}</p>
       <a href="{% url 'eshop:create_order' %}" class="btn btn-primary">Proceed to Checkout</a>
     {% else %}
-      <p>Your cart is empty.</p>
+    <p style="text-align: center; font-weight: bold; color: #FF8C00;">Your cart is empty.</p>
     {% endif %}
   </div>
 {% endblock %}

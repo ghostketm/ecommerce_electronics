@@ -44,6 +44,9 @@ class CartItem(models.Model):
 
     def __str__(self):
         return f'{self.quantity} x {self.product.name}'
+    
+    def get_total_price(self):
+        return self.quantity * self.product.price
 
 class Order(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
@@ -64,6 +67,8 @@ class Order(models.Model):
         ('CANCELLED', 'Cancelled'),
     ], default='PENDING')
 
+    def get_total_price(self):
+        return sum(item.get_total_price() for item in self.items.all())
     def __str__(self):
         return f'Order {self.id}'
 
@@ -75,6 +80,9 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f'{self.quantity} x {self.product.name}'
+    
+    def get_total_price(self):
+        return self.quantity * self.price  # Use the stored price
 
 class ProductReview(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews')

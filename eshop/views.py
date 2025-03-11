@@ -2,8 +2,9 @@ from django.shortcuts import render, get_object_or_404, redirect
 from .models import Category, Product, CartItem, Order, OrderItem, ProductReview, Cart
 from django.http import Http404
 from .forms import ReviewForm, OrderForm
+from django.views.decorators.csrf import csrf_protect
 #users
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
@@ -11,14 +12,14 @@ from .forms import UserRegisterForm
 
 # Create your views here.
 
-def register(request):
+def register_view(request):
     if request.method == 'POST':
         form = UserRegisterForm(request.POST)
         if form.is_valid():
             form.save()
             username = form.cleaned_data.get('username')
             messages.success(request, f'Account created for {username}!')
-            return redirect('login')  # Redirect to login page after registration
+            return redirect('eshop:login')  # Redirect to login page after registration
     else:
         form = UserRegisterForm()
     return render(request, 'eshop/register.html', {'form': form})
@@ -30,12 +31,14 @@ def login_view(request):
             user = form.get_user()
             login(request, user)
             messages.success(request, 'You have been logged in!')
-            return redirect('home')  # Redirect to home page
+            return redirect('eshop:home')  # Redirect to home page
     else:
         form = AuthenticationForm()
     return render(request, 'eshop/login.html', {'form': form})
 
 def logout_view(request):
+    logout(request)
+    messages.success(request, 'You have been logged out!')
     return redirect('eshop:home')  # Redirect to home page after logout
 
 def home(request):
@@ -66,7 +69,7 @@ def category_detail(request, slug):
   return render(request, 'eshop/category_detail.html', context)
 
 #cart functions
-@login_required
+@login_required(login_url='eshop:login')  # Redirect to login page if user is not logged in
 def view_cart(request):
     try:
         cart = request.user.cart
@@ -76,7 +79,7 @@ def view_cart(request):
     context = {'cart_items': cart_items, 'cart': cart}
     return render(request, 'eshop/cart.html', context)
 
-@login_required
+@login_required(login_url='eshop:login')
 def add_to_cart(request, product_id):
     product = get_object_or_404(Product, pk=product_id)
     cart, created = Cart.objects.get_or_create(user=request.user)
@@ -111,34 +114,34 @@ def update_cart(request, cart_item_id):
     return redirect('eshop:view_cart')
 
 #order functions
-@login_required
+@login_required(login_url='eshop:login')
 def create_order(request):
-  cart = Cart.objects.get(user=request.user)  # Assuming a user has one cart
-  if request.method == 'POST':
-    form = OrderForm(request.POST)
-    if form.is_valid():
-      order = Order.objects.create(user=request.user,
-                                   first_name=form.cleaned_data['first_name'],
-                                   last_name=form.cleaned_data['last_name'],
-                                   email=form.cleaned_data['email'],
-                                   address=form.cleaned_data['address'],
-                                   postal_code=form.cleaned_data['postal_code'],
-                                   city=form.cleaned_data['city'])
-      for item in cart.items.all():
-        OrderItem.objects.create(order=order, product=item.product, price=item.product.price, quantity=item.quantity)
-      # Clear the cart after successful order creation
-      cart.items.all().delete()
-      return redirect('orders_list')  # Redirect to order list after creation
-  else:
-    form = OrderForm()
-  context = {'form': form, 'cart': cart}
-  return render(request, 'eshop/create_order.html', context)
+    cart = Cart.objects.get(user=request.user)  # Assuming a user has one cart
+    if request.method == 'POST':
+        form = OrderForm(request.POST)
+        if form.is_valid():
+            order = Order.objects.create(user=request.user,
+                                         first_name=form.cleaned_data['first_name'],
+                                         last_name=form.cleaned_data['last_name'],
+                                         email=form.cleaned_data['email'],
+                                         address=form.cleaned_data['address'],
+                                         postal_code=form.cleaned_data['postal_code'],
+                                         city=form.cleaned_data['city'])
+            for item in cart.items.all():
+                OrderItem.objects.create(order=order, product=item.product, price=item.product.price, quantity=item.quantity)
+            # Clear the cart after successful order creation
+            cart.items.all().delete()
+            return redirect('eshop:orders_list')  # Use the namespace 'eshop:orders_list'
+    else:
+        form = OrderForm()
+    context = {'form': form, 'cart': cart}
+    return render(request, 'eshop/create_order.html', context)
 
-@login_required
+@login_required(login_url='eshop:login')
 def orders_list(request):
-  orders = Order.objects.filter(user=request.user).order_by('-created')
-  context = {'orders': orders}
-  return render(request, 'eshop/orders_list.html', context)
+    orders = Order.objects.filter(user=request.user).order_by('-created')
+    context = {'orders': orders}
+    return render(request, 'eshop/orders_list.html', context)
 
 @login_required
 def order_detail(request, order_id):
@@ -153,7 +156,7 @@ def product_reviews(request, product_slug):
   context = {'product': product, 'reviews': reviews}
   return render(request, 'eshop/product_reviews.html', context)
 
-@login_required
+@login_required(login_url='eshop:login')
 def add_review(request, product_slug):
   product = get_object_or_404(Product, slug=product_slug)
   if request.method == 'POST':
@@ -168,3 +171,11 @@ def add_review(request, product_slug):
     form = ReviewForm()
   context = {'product': product, 'form': form}
   return render(request, 'eshop/add_review.html', context)
+
+def all_reviews(request):
+    reviews = ProductReview.objects.all().order_by('-created')
+    return render(request, 'eshop/all_reviews.html', {'reviews': reviews})
+
+def choose_product_for_review(request):
+    products = Product.objects.filter(available=True)
+    return render(request, 'eshop/choose_product_for_review.html', {'products': products})

@@ -10,7 +10,7 @@ urlpatterns = [
     path('', views.home, name='home'),
 
     # Authentication
-    path('register/', views.register, name='register'),
+    path('register/', views.register_view, name='register'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
 
@@ -36,4 +36,6 @@ urlpatterns = [
     # Reviews
     path('products/<slug:product_slug>/reviews/', views.product_reviews, name='product_reviews'),
     path('products/<slug:product_slug>/reviews/add/', views.add_review, name='add_review'),
+    path('reviews/', views.all_reviews, name='all_reviews'),  
+    path('reviews/add/', views.choose_product_for_review, name='choose_product_for_review'), 
 ]

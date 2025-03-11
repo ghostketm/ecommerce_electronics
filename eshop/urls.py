@@ -33,6 +33,9 @@ urlpatterns = [
     path('orders/', views.orders_list, name='orders_list'),
     path('orders/<int:order_id>/', views.order_detail, name='order_detail'),
 
+    path('about/', views.about_view, name='about'),
+    path('contact/', views.contact_view, name='contact'),
+    
     # Reviews
     path('products/<slug:product_slug>/reviews/', views.product_reviews, name='product_reviews'),
     path('products/<slug:product_slug>/reviews/add/', views.add_review, name='add_review'),

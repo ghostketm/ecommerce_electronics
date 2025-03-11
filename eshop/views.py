@@ -179,3 +179,9 @@ def all_reviews(request):
 def choose_product_for_review(request):
     products = Product.objects.filter(available=True)
     return render(request, 'eshop/choose_product_for_review.html', {'products': products})
+
+def about_view(request):
+    return render(request, 'eshop/about.html')
+
+def contact_view(request):
+    return render(request, 'eshop/contact.html')
